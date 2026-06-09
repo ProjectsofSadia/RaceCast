@@ -1,0 +1,24 @@
+# secrets
+.env
+.env.local
+*.env
+!.env.example
+
+# deps
+node_modules/
+__pycache__/
+*.pyc
+venv/
+.venv/
+
+# build
+.next/
+dist/
+build/
+
+# data
+fastf1_cache/
+*.sqlite
+
+# os
+.DS_Store

@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: racecast-backend
+    runtime: docker
+    rootDir: backend
+    plan: free
+    healthCheckPath: /health
+    envVars:
+      - key: DATABASE_URL
+        sync: false          # paste your Neon URL in the Render dashboard
+      - key: REDIS_URL
+        sync: false          # paste your Upstash URL
+      - key: SECRET_KEY
+        generateValue: true  # Render generates a random secret
+      - key: CORS_ORIGINS
+        sync: false          # your Vercel URL, e.g. https://racecast.vercel.app
+      - key: OPENF1_BASE_URL
+        value: https://api.openf1.org/v1
