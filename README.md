@@ -1,112 +1,160 @@
 # RaceCast
 
-**Formula 1 Replay and Telemetry Streaming Platform**
+**Formula 1 Telemetry Infrastructure Platform**
 
-> Replay Formula 1 Like It's Live.
+RaceCast is a full-stack developer platform that transforms raw Formula 1 telemetry into accessible APIs, streaming services, and replay experiences. The platform enables developers, analysts, and AI teams to access historical race telemetry through REST APIs and WebSocket streaming without needing to build their own ingestion pipelines.
 
-A developer infrastructure product for Formula 1 data — historical replay, live telemetry streaming, and a REST + WebSocket API. Think "Stripe for F1 data."
+## Overview
 
----
+RaceCast was designed to solve a common problem: Formula 1 telemetry data is available through FastF1 but requires significant domain knowledge, custom infrastructure, and data engineering effort before it can be used for analytics, applications, or machine learning.
 
-## Stack
+Rather than building another dashboard, RaceCast focuses on the infrastructure layer, providing a developer-first experience similar to modern API platforms.
 
-| Layer | Tech |
-|---|---|
-| Frontend | Next.js 14 · TypeScript · Tailwind · Framer Motion |
-| Backend | FastAPI · PostgreSQL · Redis · WebSockets |
-| Data | FastF1 · OpenF1 |
-| Infra | Docker · Vercel · Railway |
+### Project Highlights
 
----
+* 84,613 telemetry frames processed
+* 1,423 race laps imported
+* 20 Formula 1 drivers
+* 30+ API endpoints
+* REST API + WebSocket streaming
+* Production deployment on cloud infrastructure
 
-## Features
+## Architecture
 
-**Frontend**
-- Landing page with animated telemetry hero + F1 car intro (first-visit)
-- Dashboard with live standings, real loading / empty / error states
-- Replay workstation — timeline scrubbing, multi-driver telemetry
-- Telemetry Explorer — multi-channel A-vs-B comparison
-- Developer Portal — API key create / list / revoke / usage
-- API Playground — REST builder + **real WebSocket tester**
+### System Architecture
 
-**Backend**
-- REST API: races, sessions, drivers, telemetry, events, weather, keys
-- WebSocket streaming engine (10Hz, subscription-based)
-- **Caching** — two-layer L1 (in-process LRU) + L2 (Redis), per-data-type TTLs
-- **Rate limiting** — Redis sliding window, tier-aware, real API-key validation
-- **Fast DB** — tuned connection pool, composite indexes, bulk upserts, downsampling
-- **Real data** — FastF1 importer populates Postgres; API serves `source: db` with demo fallback
+![System Architecture](architecture/system-architecture.png)
 
----
+### Data Pipeline
 
-## Quickstart
+![Data Pipeline](architecture/data-pipeline.png)
+
+### Production Deployment
+
+![Deployment Architecture](architecture/deployment-architecture.png)
+
+## Technical Stack
 
 ### Backend
-```bash
-cd backend
-python -m venv venv && source venv/bin/activate
-pip install -r requirements.txt
-cp .env.example .env
-uvicorn app.main:app --reload --port 8000
-```
+
+* Python
+* FastAPI
+* SQLAlchemy
+* PostgreSQL
+* Redis
+* WebSockets
 
 ### Frontend
-```bash
-cd frontend
-npm install
-npm run dev   # → http://localhost:3000
+
+* Next.js
+* TypeScript
+* Tailwind CSS
+
+### Infrastructure
+
+* Vercel
+* Render
+* Neon PostgreSQL
+* Upstash Redis
+* Docker
+* GitHub
+
+## Key Features
+
+### Telemetry API
+
+Access race telemetry including:
+
+* Speed
+* Throttle
+* Brake
+* Gear
+* DRS
+* Position data
+
+### Historical Replay
+
+Replay Formula 1 sessions using imported telemetry data and streaming endpoints.
+
+### Developer Platform
+
+* API Playground
+* Documentation
+* WebSocket Testing
+* Developer Console
+* Rate Limiting
+
+### Data Engineering Pipeline
+
+* Automated FastF1 ingestion
+* Data validation
+* Telemetry normalization
+* 10Hz downsampling
+* Bulk database import
+
+## Production Engineering
+
+During deployment, several production issues were identified and resolved, including:
+
+* PostgreSQL SSL connectivity
+* Cross-origin request handling
+* Environment configuration management
+* Container deployment configuration
+
+## Screenshots
+
+### Dashboard
+
+![Dashboard](screenshots/dashboard.png)
+
+### Telemetry Explorer
+
+![Telemetry](screenshots/telemetry.png)
+
+### API Playground
+
+![Playground](screenshots/api-playground.png)
+
+## Case Studies
+
+### AI Product Manager
+
+This case study focuses on product strategy, user needs, roadmap planning, success metrics, and product decisions.
+
+Location:
+
+```text
+case-studies/ai-product-manager/
 ```
 
-### Full stack
-```bash
-docker-compose up --build
+### Forward Deployed Engineer
+
+This case study focuses on architecture, deployment, production debugging, infrastructure design, and technical ownership.
+
+Location:
+
+```text
+case-studies/forward-deployed-engineer/
 ```
 
-### Import real data
-```bash
-cd backend
-python -m app.services.importer --season 2025 --race Monaco --session Race
+## Roadmap
+
+See:
+
+```text
+ROADMAP.md
 ```
 
-See **DEPLOY.md** for the full going-live guide.
+## Repository Structure
 
----
-
-## WebSocket API
-
-```js
-const ws = new WebSocket('wss://api.racecast.dev/ws/stream')
-ws.send(JSON.stringify({
-  type: 'subscribe',
-  season: 2025, race: 'monaco_gp', session: 'race',
-  drivers: ['VER', 'LEC'],
-  channels: ['speed', 'throttle', 'brake', 'gear', 'drs'],
-}))
-ws.onmessage = ({ data }) => console.log(JSON.parse(data))
+```text
+RaceCast/
+│
+├── architecture/
+├── screenshots/
+├── case-studies/
+├── backend/
+├── frontend/
+├── ROADMAP.md
+└── README.md
 ```
-
----
-
-## Project layout
-
-```
-backend/
-  app/
-    routers/      REST endpoints
-    ws/           WebSocket engine
-    services/     FastF1 importer + service
-    db/           models, queries (optimized), database
-    utils/        cache, rate_limit, config
-frontend/
-  src/
-    app/          pages (App Router)
-    components/   ui (States), layout (Nav)
-    lib/          api client, design tokens
-```
-
----
-
-## Notes
-- Frontend runs standalone with demo data — deploy it before the backend if you like.
-- API returns `source: "demo"` until you import real sessions, then `source: "db"`.
-- See `RaceCast-Design-Audit.md` for the product/design roadmap (Phases 1–3).
